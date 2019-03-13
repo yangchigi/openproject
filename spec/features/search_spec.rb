@@ -159,7 +159,7 @@ describe 'Search', type: :feature, js: true do
         filters.remove_filter('subject')
         page.find('#filter-by-text-input').set(work_packages[9].subject)
         table.expect_work_package_subject(work_packages[9].subject)
-        table.expect_work_package_not_listed(work_packages.last)
+        table.ensure_work_package_not_listed!(work_packages.last)
 
         # Expect that changing the advanced filters will not affect the global search input.
         global_search_field = page.find('.top-menu-search--input input')
@@ -169,11 +169,9 @@ describe 'Search', type: :feature, js: true do
         global_search_field.set(work_packages[10].subject)
         global_search_field.send_keys(:enter)
 
-        retry_block do
-          table.expect_work_package_not_listed(work_packages[9], wait: 20)
-          table.expect_work_package_subject(work_packages[10].subject)
-        end
-        
+        table.ensure_work_package_not_listed!(work_packages[9])
+        table.expect_work_package_subject(work_packages[10].subject)
+
         filters.expect_closed
         # ...and that advanced filter shall have copied the global search input value.
         page.find('.advanced-filters--toggle').click
@@ -186,7 +184,7 @@ describe 'Search', type: :feature, js: true do
         expect(current_url).to match(/\/#{project.identifier}\/search\?q=Other%20work%20package&work_packages=1&scope=current_project$/)
 
         # and expect that subproject's work packages will not be found
-        table.expect_work_package_not_listed other_work_package
+        table.ensure_work_package_not_listed! other_work_package
 
         # Change to project scope to include subprojects
         select_autocomplete(page.find('.top-menu-search--input'),
